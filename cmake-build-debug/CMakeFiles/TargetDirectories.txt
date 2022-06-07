@@ -1,3 +1,0 @@
-/Users/furball/CLionProjects/phony/cmake-build-debug/CMakeFiles/phony.dir
-/Users/furball/CLionProjects/phony/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/furball/CLionProjects/phony/cmake-build-debug/CMakeFiles/rebuild_cache.dir
