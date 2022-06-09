@@ -26,24 +26,44 @@ int open_file(char filename[])
     return 1;
 }
 
-char *strshift(char *string, int shift)
-{
-    if (!string || !shift) return 0;
-    char *result;
-    int actual_lenght = strlen(string) - shift;
+int numPlaces (int n) {
+    if (n < 0) return numPlaces ((n == INT_MIN) ? INT_MAX: -n);
+    if (n < 10) return 1;
+    return 1 + numPlaces (n / 10);
+}
 
-    result = malloc(sizeof(char) * actual_lenght);
+
+char *strshift(char *string)
+{
+    if (!string) return 0;
+    char *result = NULL;
+    char *pattern = "[%u, %u], ";
+    char match[200];
+    char pin = 0;
+    int digit = 0;
+    int shift = 0;
+
+    if (*string != '[') return NULL;
+
+    digit = atoi(string+1);
+    //string += numPlaces(digit);
+
+
+
+    int actual_length = strlen(string) - shift;
+
+    result = malloc(sizeof(char) * actual_length);
     if (!result) return 0;
-    for (int i = 0; i < actual_lenght; i++) {
+    for (int i = 0; i < actual_length; i++) {
         result[i] = string[i+shift];
     }
-    result[actual_lenght+1] = '\0';
+    result[actual_length+1] = '\0';
 
     return result;
 }
 
 int main() {
-    char filename[] = "../net1.txt"; // название файла
+    char filename[] = "../network1.txt"; // название файла
     char fileString[200];
     char *remainder; // остаток от строки
     char v_arr[LINES][200]; // массив с обоими строками
@@ -54,8 +74,8 @@ int main() {
 
     if (!open_file(filename)) return 0;
 
-    remainder = malloc(sizeof(char));
-    format = malloc(sizeof(char));
+    remainder = malloc(sizeof(char) * 200);
+    format = malloc(sizeof(char) * 4 );
 
     i = 0;
     while (fgets(fileString, 200, MYFILE)) {
@@ -73,6 +93,7 @@ int main() {
         str_size = strlen(remainder);
         strcpy(v_arr[i], remainder);
         i++;
+        free(remainder);
     }
 
     if (DEBUG) {
@@ -84,7 +105,7 @@ int main() {
     }
 
     // указал формат
-    format = strcpy(format, "[%u");
+    format = strcpy(format, "[%u,");
 
 
     int v_from = 0, v_to = 0;
@@ -102,8 +123,8 @@ int main() {
 
         graph[v_from-1][v_to-1] = graph[v_to-1][v_from-1] = 1;
 
-        strcpy(v_arr[0], strshift(v_arr[0], 8));
-        strcpy(v_arr[1], strshift(v_arr[1], 8));
+        strcpy(v_arr[0], strshift(v_arr[0]));
+        strcpy(v_arr[1], strshift(v_arr[1]));
     }
 
     for (i = 0; i < VERTICLES; i++) {
