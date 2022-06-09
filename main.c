@@ -43,10 +43,10 @@ char *strshift(char *string, int shift)
 }
 
 int main() {
-    char filename[] = "../network1.txt"; // название файла
+    char filename[] = "../net1.txt"; // название файла
     char fileString[200];
     char *remainder; // остаток от строки
-    char v_arr[LINES][VERTICLES]; // массив с обоими строками
+    char v_arr[LINES][200]; // массив с обоими строками
     char *format;
     int i = 0;
     int graph[VERTICLES][VERTICLES];
@@ -59,18 +59,19 @@ int main() {
 
     i = 0;
     while (fgets(fileString, 200, MYFILE)) {
-        str_size = strlen(fileString) - 4;
-        malloc(sizeof(char) * str_size);
+        str_size = strlen(fileString) - 3;
+//        malloc(sizeof(char) * str_size);
 
         // отформатировал строку
-        remainder = realloc(remainder, str_size);
+//        malloc(sizeof(char) * str_size);
         remainder = strncpy(remainder, fileString + 1, str_size);
-
+        *(remainder + strlen(remainder)) = '\0';
+        char h = *(remainder + strlen(remainder));
         if (DEBUG) {
             printf("remainder \n%s\n", remainder);
         }
-
-        strncpy(v_arr[i], remainder, str_size);
+        str_size = strlen(remainder);
+        strcpy(v_arr[i], remainder);
         i++;
     }
 
@@ -101,8 +102,8 @@ int main() {
 
         graph[v_from-1][v_to-1] = graph[v_to-1][v_from-1] = 1;
 
-        strncpy(v_arr[0], strshift(*v_arr+0, 8), 8);
-        strncpy(v_arr[1], strshift(*v_arr+0, 8), 8);
+        strcpy(v_arr[0], strshift(v_arr[0], 8));
+        strcpy(v_arr[1], strshift(v_arr[1], 8));
     }
 
     for (i = 0; i < VERTICLES; i++) {
