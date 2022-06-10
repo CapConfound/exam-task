@@ -1,4 +1,8 @@
-#define _CRTECURE_NO_WARNINGS
+//
+// Created by ilya1 on 10.06.2022.
+//
+
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <string.h>
@@ -12,6 +16,7 @@
 
 
 FILE* MYFILE;
+errno_t err;
 const int DEBUG = false;
 const int LINES = 2;
 const int SWITCH_N = 11;
@@ -21,7 +26,7 @@ const int VERTICES = SWITCH_N + HOSTS_N;
 
 int open_file(char *filename)
 {
-    if (!(MYFILE = fopen(filename, "r"))) {
+    if (fopen_s(&MYFILE, filename, "r")) {
         puts("An error occured. File not found.");
         puts("current directory");
         system("pwd");
@@ -83,14 +88,14 @@ char* strshift(char* string)
 }
 
 int main() {
-    char filename[] = "../network1.txt"; // название файла
+    char filename[] = "network1.txt"; // название файла
     char fileString[200];
     char remainder[200]; // остаток от строки
     char v_arr[LINES][200]; // массив с обоими строками
     char format[] = "[%u,";
     int i = 0;
     int graph[VERTICES][VERTICES];
-    size_t strize; // полезный размер строчки
+    size_t str_size; // полезный размер строчки
 
     if (!open_file(filename)) return 0;
 
@@ -99,17 +104,17 @@ int main() {
 
     i = 0;
     while (fgets(fileString, 200, MYFILE)) {
-        strize = strlen(fileString) - 3;
+        str_size = strlen(fileString) - 3;
 
         // отформатировал строку
-        strncpy(remainder, fileString + 1, strize);
-        remainder[strize] = '\0';
+        strncpy_s(remainder, fileString + 1, str_size);
+        remainder[str_size] = '\0';
         char h = remainder[strlen(remainder)];
         if (DEBUG) {
             printf("remainder \n%s\n", remainder);
         }
-        strize = strlen(remainder);
-        strcpy(v_arr[i], remainder);
+        str_size = strlen(remainder);
+        strcpy_s(v_arr[i], remainder);
         i++;
         remainder[0] = '\0';
     }
@@ -144,11 +149,11 @@ int main() {
         graph[v_from - 1][v_to - 1] = graph[v_to - 1][v_from - 1] = 1;
 
         if ((temp = strshift(v_arr[0])) != NULL) {
-            strcpy(v_arr[0], temp);
+            strcpy_s(v_arr[0], temp);
         }
 
         if ((temp = strshift(v_arr[1])) != NULL) {
-            strcpy(v_arr[1], temp);
+            strcpy_s(v_arr[1], temp);
         }
 
     }

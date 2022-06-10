@@ -3,4 +3,4 @@ project(phony C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(phony main.c)
+add_executable(phony main.c vs.c)
