@@ -1,18 +1,15 @@
-//
-// Created by ilya1 on 10.06.2022.
-//
-
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
-
+#include <math.h>
 
 
 #define true 1
 #define false 0
+#define VERTICES MAX
 
 
 FILE* MYFILE;
@@ -22,7 +19,7 @@ const int LINES = 2;
 const int SWITCH_N = 11;
 const int HOSTS_N = 12;
 const int VERTICES = SWITCH_N + HOSTS_N;
-
+int G[VERTICES][VERTICES], visited[VERTICES], n;
 
 int open_file(char *filename)
 {
@@ -41,7 +38,6 @@ int numPlaces(int n) {
     if (n < 10) return 1;
     return 1 + numPlaces(n / 10);
 }
-
 
 char* strshift(char* string)
 {
@@ -87,7 +83,79 @@ char* strshift(char* string)
     return result;
 }
 
-int main() {
+void dijkstra(int G[VERTICES][VERTICES], int n, int startnode)
+{
+
+    int cost[VERTICES][VERTICES], distance[VERTICES], pred[VERTICES];
+    int visited[VERTICES], count, mindistance, nextnode = 0, i, j;
+    //pred[] stores the predecessor of each node
+    //count gives the number of nodes seen so far
+    //create the cost matrix
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            if (G[i][j] == 0)
+                cost[i][j] = INFINITY;
+            else
+                cost[i][j] = G[i][j];
+    //initialize pred[],distance[] and visited[]
+    for (i = 0; i < n; i++)
+    {
+        distance[i] = cost[startnode][i];
+        pred[i] = startnode;
+        visited[i] = 0;
+    }
+    distance[startnode] = 0;
+    visited[startnode] = 1;
+    count = 1;
+    while (count < n - 1)
+    {
+        mindistance = INFINITY;
+        //nextnode gives the node at minimum distance
+        for (i = 0; i < n; i++)
+            if (distance[i] < mindistance && !visited[i])
+            {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+        //check if a better path exists through nextnode
+        visited[nextnode] = 1;
+        for (i = 0; i < n; i++)
+            if (!visited[i])
+                if (mindistance + cost[nextnode][i] < distance[i])
+                {
+                    distance[i] = mindistance + cost[nextnode][i];
+                    pred[i] = nextnode;
+                }
+        count++;
+    }
+
+    //print the path and distance of each node
+    for (i = 0; i < n; i++)
+        if (i != startnode)
+        {
+            printf("\nDistance of node%d=%d", i, distance[i]);
+            printf("\nPath=%d", i);
+            j = i;
+            do
+            {
+                j = pred[j];
+                printf("<-%d", j);
+            } while (j != startnode);
+        }
+}
+
+void DFS(int i)
+{
+    int j;
+    printf("\n%d", i);
+    visited[i] = 1;
+    for (j = 0; j < n; j++)
+        if (!visited[j] && G[i][j] == 1)
+            DFS(j);
+}
+
+int main()
+{
     char filename[] = "network1.txt"; // название файла
     char fileString[200];
     char remainder[200]; // остаток от строки
@@ -100,7 +168,6 @@ int main() {
     if (!open_file(filename)) return 0;
 
     //    remainder = malloc(sizeof(char) * 200);
-
 
     i = 0;
     while (fgets(fileString, 200, MYFILE)) {
@@ -138,7 +205,7 @@ int main() {
     }
 
     char* temp = NULL;
-    int j = 11;
+    int j = 12;
     for (i = 0; *v_arr[0] != 0 && i < VERTICES; i++) {
 
         sscanf(v_arr[0], format, &v_from);
@@ -147,6 +214,8 @@ int main() {
         v_from = v_from == 0 ? j++ : v_from;
 
         graph[v_from - 1][v_to - 1] = graph[v_to - 1][v_from - 1] = 1;
+
+        printf("Вершины - %d - %d\n", v_from, v_to);
 
         if ((temp = strshift(v_arr[0])) != NULL) {
             strcpy_s(v_arr[0], temp);
@@ -158,12 +227,41 @@ int main() {
 
     }
 
+    puts("матрица смежности\n");
+    printf("     ");
+    for (int i = 0; i < VERTICES; i++) {
+
+        printf("%d ", i+1);
+        if (i < 9) printf(" ", i);
+    }
+
+    putchar('\n');
+    for (int i = 0; i < VERTICES*1.6; i++) {
+        printf("--");
+    }
+
+
+
+    putchar('\n');
     for (i = 0; i < VERTICES; i++) {
+        if (i < 9) printf(" ", i);
+        printf("%d| ", i+1);
         for (int j = 0; j < VERTICES; j++) {
+
             printf(" %d ", graph[i][j]);
         }
         printf("\n");
     }
 
+
+    // че делать будем?
+
+
+    dijkstra(graph, VERTICES, 2);
+
+
+    puts("");
+
     return 0;
 }
+
