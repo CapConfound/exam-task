@@ -19,7 +19,108 @@ const int LINES = 2;
 const int SWITCH_N = 11;
 const int HOSTS_N = 12;
 const int VERTICES = SWITCH_N + HOSTS_N;
-int G[VERTICES][VERTICES], visited[VERTICES], n;
+int G[VERTICES][VERTICES], visited[VERTICES];
+int q[20], n, i, j, f = 0, r = -1;
+
+typedef struct node {
+    int vertex;
+    struct node* next;
+};
+
+typedef struct Graph {
+    int numVertices;
+    int* visited;
+
+    // Нам нужен int** для хранения двумерного массива.
+    // Аналогично, нам нужна структура node** для хранения массива связанных списков.
+    struct node** adjLists;
+};
+
+void DFS(struct Graph* graph, int vertex) {
+    struct node* adjList = graph->adjLists[vertex];
+    struct node* temp = adjList;
+
+    graph->visited[vertex] = 1;
+    printf("Visited %d \n", vertex);
+
+    while (temp != NULL) {
+        int connectedVertex = temp->vertex;
+
+        if (graph->visited[connectedVertex] == 0) {
+            DFS(graph, connectedVertex);
+        }
+        temp = temp->next;
+    }
+
+    for (int i = 0; i < VERTICES; i++) {
+        printf(" %d", i+1);
+    }
+
+    printf("\n");
+
+    for (int i = 0; i < VERTICES; i++) {
+        if (i > 9) printf(" ");
+        printf(" %d", graph->visited[i]);
+    }
+    printf("\n");
+}
+
+struct node* createNode(int v) {
+    struct node* newNode = (node *)malloc(sizeof(struct node));
+    newNode->vertex = v;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Создание графа
+struct Graph* createGraph(int vertices) {
+    struct Graph* graph = (Graph *)malloc(sizeof(struct Graph));
+    graph->numVertices = vertices;
+
+    graph->adjLists = (node **)malloc(vertices * sizeof(struct node*));
+
+    graph->visited = (int *)malloc(vertices * sizeof(int));
+
+    int i;
+    for (i = 0; i < vertices; i++) {
+        graph->adjLists[i] = NULL;
+        graph->visited[i] = 0;
+    }
+    return graph;
+}
+
+// Добавление ребра
+void addEdge(struct Graph* graph, int src, int dest) {
+    // Проводим ребро от начальной вершины ребра графа к конечной вершине ребра графа
+    struct node* newNode = createNode(dest);
+    newNode->next = graph->adjLists[src];
+    graph->adjLists[src] = newNode;
+
+    // Проводим ребро из конечной вершины ребра графа в начальную вершину ребра графа
+    newNode = createNode(src);
+    newNode->next = graph->adjLists[dest];
+    graph->adjLists[dest] = newNode;
+}
+
+// Выводим граф
+void printGraph(struct Graph* graph) {
+    int v;
+    for (v = 0; v < graph->numVertices; v++) {
+        struct node* temp = graph->adjLists[v];
+        printf("\n Adjacency list of vertex %d\n ", v);
+        while (temp) {
+            printf("%d -> ", temp->vertex);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+}
+
+
+
+
+
+
 
 int open_file(char *filename)
 {
@@ -83,77 +184,6 @@ char* strshift(char* string)
     return result;
 }
 
-void dijkstra(int G[VERTICES][VERTICES], int n, int startnode)
-{
-
-    int cost[VERTICES][VERTICES], distance[VERTICES], pred[VERTICES];
-    int visited[VERTICES], count, mindistance, nextnode = 0, i, j;
-    //pred[] stores the predecessor of each node
-    //count gives the number of nodes seen so far
-    //create the cost matrix
-    for (i = 0; i < n; i++)
-        for (j = 0; j < n; j++)
-            if (G[i][j] == 0)
-                cost[i][j] = INFINITY;
-            else
-                cost[i][j] = G[i][j];
-    //initialize pred[],distance[] and visited[]
-    for (i = 0; i < n; i++)
-    {
-        distance[i] = cost[startnode][i];
-        pred[i] = startnode;
-        visited[i] = 0;
-    }
-    distance[startnode] = 0;
-    visited[startnode] = 1;
-    count = 1;
-    while (count < n - 1)
-    {
-        mindistance = INFINITY;
-        //nextnode gives the node at minimum distance
-        for (i = 0; i < n; i++)
-            if (distance[i] < mindistance && !visited[i])
-            {
-                mindistance = distance[i];
-                nextnode = i;
-            }
-        //check if a better path exists through nextnode
-        visited[nextnode] = 1;
-        for (i = 0; i < n; i++)
-            if (!visited[i])
-                if (mindistance + cost[nextnode][i] < distance[i])
-                {
-                    distance[i] = mindistance + cost[nextnode][i];
-                    pred[i] = nextnode;
-                }
-        count++;
-    }
-
-    //print the path and distance of each node
-    for (i = 0; i < n; i++)
-        if (i != startnode)
-        {
-            printf("\nDistance of node%d=%d", i, distance[i]);
-            printf("\nPath=%d", i);
-            j = i;
-            do
-            {
-                j = pred[j];
-                printf("<-%d", j);
-            } while (j != startnode);
-        }
-}
-
-void DFS(int i)
-{
-    int j;
-    printf("\n%d", i);
-    visited[i] = 1;
-    for (j = 0; j < n; j++)
-        if (!visited[j] && G[i][j] == 1)
-            DFS(j);
-}
-
 int main()
 {
     char filename[] = "network1.txt"; // название файла
@@ -164,6 +194,7 @@ int main()
     int i = 0;
     int graph[VERTICES][VERTICES];
     size_t str_size; // полезный размер строчки
+    Graph* graph1 = createGraph(VERTICES);
 
     if (!open_file(filename)) return 0;
 
@@ -214,6 +245,7 @@ int main()
         v_from = v_from == 0 ? j++ : v_from;
 
         graph[v_from - 1][v_to - 1] = graph[v_to - 1][v_from - 1] = 1;
+        addEdge(graph1, v_from, v_to);
 
         printf("Вершины - %d - %d\n", v_from, v_to);
 
@@ -257,11 +289,13 @@ int main()
     // че делать будем?
 
 
-    dijkstra(graph, VERTICES, 2);
-
-
     puts("");
+
+
+    printGraph(graph1);
+
+    DFS(graph1, 1);
+
 
     return 0;
 }
-
